@@ -1,14 +1,14 @@
+<script lang="ts">
+import HeaderView from "@/components/HeaderView.vue"
+
+export default {
+  components: {
+    HeaderView,
+  },
+}
+</script>
 
 <template>
-  <header>
-      <nav>
-        <RouterLink to="/top">Top</RouterLink>
-        <RouterLink to="/header">header</RouterLink>
-        <RouterLink to="/cart">cart</RouterLink>
-      </nav>
-  </header>
   <HeaderView />
-  <RouterView />
+  <router-view />
 </template>
-<script>
-</script>

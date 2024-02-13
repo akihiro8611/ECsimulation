@@ -3,6 +3,9 @@
     <div class="customer-information-title">
       <h1 class="information-title-text">お客様情報入力</h1>
     </div>
+    <div v-for="cartItem in cartItems" :key="cartItem.product_id">
+      {{ cartItem.product_name }} - {{ cartItem.count }}
+    </div>
     <div class="customer-wrapper">
       <div class="customer-information">
         <div v-for="field in fields" :key="field.id" class="import-box">
@@ -42,7 +45,9 @@
       </div>
     </div>
     <div class="customer-next-link">
-      <button class="next-link-text">注文確認画面へ</button>
+      <button class="next-link-text" @click="navigateToConfirmationInfo">
+        <p>注文確認画面へ</p>
+      </button>
     </div>
   </div>
 </template>
@@ -85,8 +90,13 @@ export default {
         { id: 4, label: "セキュリティーコード", name: "securityCord" }
       ],
     };
-  }
-};
+  },
+  methods: {
+    navigateToConfirmationInfo() {
+      this.$router.push('/confirmation');
+    },
+  },
+}
 </script>
 <style>
 .customer-contener {
@@ -135,5 +145,63 @@ export default {
   background-color: #d9d9d9;
   border-radius: 40px;
   margin-top: 20px;
+}
+@media screen and (max-width: 767px) {
+  .customer-contener {
+    padding: 112px 0 0;
+  }
+  .customer-information-title {
+    padding: 0;
+  }
+  .information-title-text {
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 20px;
+  }
+  .customer-wrapper {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: center;
+  }
+  .customer-information,.category-contents {
+    border:none;
+    border-top: 1px solid #000;
+    justify-content: center;
+    padding: 20px;
+    width: 100%;
+  }
+  .category-contents {
+    border-bottom: 1px solid #000;
+  }
+  .category-contents {
+  margin-top: 0;
+}
+.payment-title,.import-title-text {
+  font-size: 20px;
+}
+.payment-information {
+  margin-left: 0;
+}
+  .payment-serect, .bank-type-serect {
+    display: flex;
+    justify-content: center;
+    font-size: 20px;
+    margin: 16px 0;
+  }
+  .import-box,
+  .payment-form-box,
+  .bank-type-serect {
+    margin-top: 36px;
+  }
+  .import-box:first-of-type,.payment-form-box:first-of-type {
+    margin-top: 0;
+  }
+  .import-form,.payment-form {
+    width: 100%;
+    height: 55px;
+    background-color: #d9d9d9;
+    border-radius: 40px;
+    margin-top: 20px;
+  }
 }
 </style>

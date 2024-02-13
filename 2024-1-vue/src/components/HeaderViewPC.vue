@@ -1,3 +1,4 @@
+// HeaderViewPC.vue
 <template>
   <main>
     <div class="header-contener">
@@ -16,7 +17,7 @@
           </a>
         </div>
         <div class="header-menu-wrapper">
-          <button type="button" class="menu-btn">
+          <button @click="toggleMenu" class="menu-btn">
             <div class="fa-bars">
               <span class="hamburger-bar"></span>
               <span class="hamburger-bar"></span>
@@ -27,42 +28,35 @@
             </div>
           </button>
         </div>
-
       </div>
     </div>
-    <div class="header-inner-menu">
-      <button class="inner-close"></button>
+    <div v-show="isMenuVisible" class="header-inner-menu">
+      <button @click="closeMenu" class="inner-close"></button>
       <div class="inner-link-contents">
         <button class="inner-menu-box">
           <RouterLink to="/cart">
             <div class="menu-box-icon">
-            <img src="../assets/CartICon.png" alt="">
+              <img src="../assets/CartICon.png" alt="">
             </div>
             <div class="menu-box-text">
-              <p>
-                カート
-              </p>
+              <p>カート</p>
             </div>
           </RouterLink>
         </button>
         <div class="inner-menu-box">
           <div class="menu-box-icon">
-          <img src="../assets/material-symbols-light_star-outline.png" alt="">
-        </div>
-        <div class="menu-box-text">
-          <p>
-            お気に入り
-          </p>
-        </div>
+            <img src="../assets/material-symbols-light_star-outline.png" alt="">
+          </div>
+          <div class="menu-box-text">
+            <p>お気に入り</p>
+          </div>
         </div>
         <div class="inner-menu-box">
           <div class="menu-box-icon">
             <img src="../assets/mail.png" alt="">
           </div>
           <div class="menu-box-text">
-            <p>
-              お問い合わせ
-            </p>
+            <p>お問い合わせ</p>
           </div>
         </div>
         <div class="inner-menu-box">
@@ -70,23 +64,42 @@
             <img src="../assets/gift.png" alt="">
           </div>
           <div class="menu-box-text">
-            <p>
-              購入履歴
-            </p>
+            <p>購入履歴</p>
           </div>
         </div>
       </div>
     </div>
   </main>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      isMenuVisible: false,
+    };
+  },
+  methods: {
+    toggleMenu() {
+      console.log('toggleMenu is called');
+      this.isMenuVisible = !this.isMenuVisible;
+    },
+    closeMenu() {
+      this.isMenuVisible = false;
+    },
+  },
+};
+</script>
+
 <style>
 .header-contener {
   background-color: #fff;
   display: flex;
-  width: 100vw;
+  width: 100%;
   color: #000;
   height: 72px;
   border-bottom: 1px solid #000;
+  position: fixed;
 }
 .header-logo {
   border-right: 1px solid #000;
@@ -98,13 +111,9 @@
   display: flex;
   margin: 0 56px 0 auto;
 }
-.mypage-link {
-  margin: 0;
-  padding: 0;
-}
+
 .header-mypage-wrapper {
   height: 72px;
-
 }
 .mypage-icon {
   height: 98%;
@@ -124,8 +133,8 @@
   flex-direction: column;
   justify-content: center;
   width: 80px;
+  cursor: pointer;
 }
-
 .hamburger-bar {
   background: #000;
   content: '';
@@ -136,11 +145,9 @@
   width: 30px;
   border-radius: 20px;
 }
-
 .hamburger-bar:nth-child(1) {
   top: 0;
 }
-
 .hamburger-bar:nth-child(2) {
   margin-top: 9px;
   transform: translateY(-50%);
@@ -155,7 +162,14 @@
   margin-top: 8px;
 }
 .header-inner-menu {
-  margin-top: 103px;
+  padding-top: 103px;
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  margin-top: 72px;
+  display: block;
 }
 .inner-close {
   background-color: transparent;
@@ -165,8 +179,9 @@
   position: absolute;
   width: 42px;
   height: 42px;
-  top: 94px;
-right: 56px;
+  top: 20px;
+  right: 56px;
+  cursor: pointer;
 }
 
 .inner-close::before,
@@ -190,7 +205,7 @@ right: 56px;
 }
 .inner-link-contents {
   display: flex;
-  width: 1280px;
+  width: 100%;
   padding: 0px 56px 40px 0px;
   justify-content: flex-end;
   align-items: flex-start;
@@ -215,6 +230,5 @@ right: 56px;
   font-weight: bold;
   line-height: normal;
   margin-top: 20px;
-
 }
 </style>

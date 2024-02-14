@@ -134,7 +134,7 @@
           this.$store.commit('addToCart', cartItem);
 
           // ページ遷移
-          this.$router.push({ name: 'cart' });
+          // this.$router.push({ name: 'cart' });
 
           // カートアイテムの追加が完了したら数量をリセット
           this.resetCount(item);
@@ -158,6 +158,11 @@
               image: productDetails.image,
               stock: productDetails.stock,
               category_id: productDetails.category_id,
+              rating: productDetails.rating,
+              created_at: productDetails.created_at,
+              updated_at: productDetails.updated_at,
+              is_deleted: productDetails.is_deleted,
+              deleted_at: productDetails.deleted_at,
             };
 
             return formattedDetails;
@@ -315,6 +320,7 @@ main {
   .top-item-box {
     padding: 16px;
     width: calc(75%/3);
+    aspect-ratio: 320/492;
     margin-bottom: 20px;
   }
   .item-title {

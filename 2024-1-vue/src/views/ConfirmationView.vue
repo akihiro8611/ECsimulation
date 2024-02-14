@@ -5,7 +5,7 @@
       <h1 class="confirmation-part-title">お客様情報</h1>
     </div>
     <div class="customer-information-export">
-
+      
     </div>
     <div class="customer-payment-export">
 

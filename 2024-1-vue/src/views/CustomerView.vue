@@ -3,9 +3,6 @@
     <div class="customer-information-title">
       <h1 class="information-title-text">お客様情報入力</h1>
     </div>
-    <div v-for="cartItem in cartItems" :key="cartItem.product_id">
-      {{ cartItem.product_name }} - {{ cartItem.count }}
-    </div>
     <div class="customer-wrapper">
       <div class="customer-information">
         <div v-for="field in fields" :key="field.id" class="import-box">

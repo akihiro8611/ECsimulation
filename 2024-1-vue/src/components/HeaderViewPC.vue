@@ -1,4 +1,3 @@
-// HeaderViewPC.vue
 <template>
   <main>
     <div class="header-contener">
@@ -87,6 +86,10 @@ export default {
     closeMenu() {
       this.isMenuVisible = false;
     },
+  },
+  beforeRouteUpdate(to, from, next) {
+    this.isMenuVisible = false;
+    next();
   },
 };
 </script>

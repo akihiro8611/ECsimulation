@@ -107,11 +107,8 @@
 
         if (item && item.count > 0) {
           console.log('商品の数量が正常です。カートにアイテムを追加します。item:', item);
-
-          // 商品の詳細情報を取得
           const productDetails = await this.getProductDetails(item.product_id);
 
-          // カートに追加されたアイテムの情報を構築
           const cartItem = {
             product_id: productDetails.product_id,
             product_name: productDetails.product_name,
@@ -129,15 +126,8 @@
             assignedData: this.getAssignedData(item),
             productDetails: productDetails,
           };
-
-          // Vuexストアのミューテーションを呼び出してカートにアイテムを追加
           this.$store.commit('addToCart', cartItem);
-
-          // ページ遷移
-          // this.$router.push({ name: 'cart' });
-
-          // カートアイテムの追加が完了したら数量をリセット
-          this.resetCount(item);
+          
         } else {
           console.warn('商品の数量が0です。カートに追加されませんでした。', item);
         }

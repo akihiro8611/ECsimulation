@@ -48,53 +48,44 @@
     </div>
   </main>
 </template>
-
 <script>
-import { mapState } from 'vuex';
+import { defineComponent, ref, onMounted } from 'vue';
+import { useCartStore } from '/src/stores/cartStore';
+import { useRouter } from 'vue-router';
 
-export default {
-  props: {
-    selectedItems: Array,
+export default defineComponent({
+
+  setup() {
+    const cartStore = useCartStore();
+    const cartItems = ref([]);
+    const router = useRouter();
+
+    onMounted(() => {
+      cartItems.value = cartStore.getCartItems();
+    });
+
+    const navigateToCustomerInfo = () => {
+      router.push('/customer');
+    };
+
+    const removeFromCart = (productId) => {
+      cartStore.removeFromCart(productId);
+      cartItems.value = cartStore.getCartItems();
+    };
+
+    return {
+      cartItems,
+      removeFromCart,
+      navigateToCustomerInfo,
+    };
   },
-  computed: {
-    ...mapState(['cartItems']),
-    totalItemCount() {
-      return this.cartItems.reduce((total, item) => total + item.count, 0);
-    },
-    totalCartPrice() {
-      return this.cartItems.reduce((total, item) => total + item.price * item.count, 0);
-    },
-  },
-  methods: {
-    decrementCount(item) {
-      if (item.count > 0) {
-        item.count--;
-      }
-    },
-    incrementCount(item) {
-      if (item.count < item.stock)
-        item.count++;
-    },
-    resetCount(item) {
-      item.count = 0;
-    },
-    calculateTotalPrice(item) {
-      return item.price * item.count;
-    },
-    navigateToCustomerInfo() {
-      this.$router.push('/customer');
-    },
-  },
-  async mounted() {
-    const cartItems = this.$store.state.cartItems;
-    console.log('Cart items in CartView:', cartItems);
-  },
-};
+});
 </script>
 <style lang="scss">
 main {
   background: #fff;
   color: #333;
+  padding-top: 72px;
 }
 
 .cart-container {
@@ -368,3 +359,4 @@ main {
   }
 }
 </style>
+../stores/cartStore

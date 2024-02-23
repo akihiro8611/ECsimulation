@@ -13,7 +13,6 @@
           <label :for="option.value">{{ option.label }}</label>
         </div>
       </div>
-    
       <div v-if="store.selectedOption === 'bank'" class="category-contents">
         <div class="bank-payment-information">
           <div v-for="field in store.bankFields" :key="field.id" class="payment-form-box">
@@ -37,26 +36,34 @@
         </div>
       </div>
     </div>
+  </div>
+  <div>
     <div class="customer-next-link">
-      <button class="next-link-text" @click="store.navigateToConfirmationInfo">
+      <button class="next-link-text" @click="navigateToConfirmationInfo">
         <p>注文確認画面へ</p>
       </button>
     </div>
   </div>
 </template>
-
 <script>
+import { defineComponent, } from 'vue';
 import { useCustomerFormStore } from '@/stores/customerStore';
-
-export default {
+import { useRouter } from 'vue-router';
+export default defineComponent({
   setup() {
     const store = useCustomerFormStore();
-
-    return { store };
+    const router = useRouter();
+    const navigateToConfirmationInfo = () => {
+      router.push('/confirmation');
+    };
+    return {
+      store,
+      navigateToConfirmationInfo,
+    };
   },
-
-}
+});
 </script>
+
 <style>
 .customer-container {
   padding: 40px;

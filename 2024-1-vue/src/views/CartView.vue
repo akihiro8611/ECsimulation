@@ -29,7 +29,7 @@
                 </div>
               </div>
             </div>
-            <div class="cart-item-price">{{ calculateTotalPrice(item) }}円</div>
+            <!-- <div class="cart-item-price">{{ calculateTotalPrice(item) }}円</div> -->
             <div class="cart-item-product-id">{{ item.product_id }}</div>
           </div>
         </div>

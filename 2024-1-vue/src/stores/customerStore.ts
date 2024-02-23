@@ -54,5 +54,13 @@ export const useCustomerFormStore = defineStore('customerForm', {
         bankType.checked = bankType.value === 'normalBank';
       });
     },
+    setCustomerInfo(customerInfo) {
+      this.fields = customerInfo.fields;
+      this.paymentOptions = customerInfo.paymentOptions;
+      this.selectedOption = customerInfo.selectedOption;
+      this.bankFields = customerInfo.bankFields;
+      this.bankTypes = customerInfo.bankTypes;
+      this.creditFields = customerInfo.creditFields;
+    },
   },
 });

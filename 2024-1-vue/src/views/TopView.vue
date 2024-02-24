@@ -90,8 +90,10 @@ export default {
         return;
       }
 
+      // カートストアに商品を追加する際、数量も取得して一緒に渡す
       try {
-        await cartStore.addToCart(selectedProduct);
+        const quantity = counterStore.getCounter(productId);
+        await cartStore.addToCart({ productId, quantity, product: selectedProduct });
         console.log('Added to cart:', selectedProduct);
       } catch (error) {
         console.error('Error adding to cart:', error);

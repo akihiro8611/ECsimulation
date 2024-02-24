@@ -36,19 +36,42 @@
       </div>
     </div>
   </div>
-  
+  <div v-for="item in cartItems" :key="item.product_id" class="cart-item-box">
+    <div class="cart-item-photo-box">
+      <img :src="item.image" alt="" class="cart-item-photo">
+    </div>
+    <div class="cart-item-text-box">
+      <h2 class="cart-item-title">{{ item.product_name }}</h2>
+      <div class="cart-item-explanation">{{ item.description }}</div>
+      <div class="cart-item-count-contents">
+        <div class="item-count-box">
+          <div class="item-count">
+            <!-- <span>数量: {{ getCounter(item.product_id) }}</span> -->
+            <!-- ↑ここでエラーが出ている -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, ref, onMounted, } from 'vue';
+import { useCartStore } from '/src/stores/cartStore';
 import { useCustomerFormStore } from '@/stores/customerStore';
 
 export default defineComponent({
   setup() {
+    const cartStore = useCartStore();
+    const cartItems = ref([]);
     const store = useCustomerFormStore();
 
-    return {
+    onMounted(() => {
+      cartItems.value = cartStore.getCartItems();
+    });
 
+    return {
+      cartItems,
       store,
     };
   },

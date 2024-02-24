@@ -7,37 +7,38 @@
       </div>
       <div class="cart-item-wrapper">
         <div v-for="item in cartItems" :key="item.product_id" class="cart-item-box">
-          <div class="cart-item-photo-box">
-            <img :src="item.image" alt="" class="cart-item-photo">
-          </div>
-          <div class="cart-item-text-box">
-            <h2 class="cart-item-title">{{ item.product_name }}</h2>
-            <div class="cart-item-explanation">{{ item.description }}</div>
-            <div class="cart-item-count-contents">
-              <div class="cart-item-count-box">
-                <div class="cart-item-count">
-                  <button class="cart-item-count-button" @click="decrementCount(item)">
-                    <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
-                  </button>
-                  {{ item.count }}
-                  <button class="cart-item-count-button" @click="incrementCount(item, item.stock)">
-                    <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
-                  </button>
-                </div>
-                <div class="cart-dust-box" @click="resetCount(item)">
-                  <img src="../assets/Vector.png" alt="" class="item-count-icon">
+          <div v-if="getCounter(item.product_id) > 0">
+            <div class="cart-item-photo-box">
+              <img :src="item.image" :alt="item.product_name" class="cart-item-photo">
+            </div>
+            <div class="cart-item-text-box">
+              <h2 class="cart-item-title">{{ item.product_name }}</h2>
+              <div class="cart-item-explanation">{{ item.description }}</div>
+              <div class="cart-item-count-contents">
+                <div class="item-count-box">
+                  <div class="item-count">
+                    <button class="item-count-button" @click="decrement(item.product_id)">
+                      <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
+                    </button>
+                    {{ quantity(item.product_id) }}
+                    <button class="item-count-button" @click="increment(item.product_id)">
+                      <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
+                    </button>
+                  </div>
+                  <div class="dust-box" @click="reset(item.product_id)">
+                    <img src="../assets/Vector.png" alt="" class="item-count-icon">
+                  </div>
                 </div>
               </div>
+              <div class="cart-item-product-id">{{ item.product_id }}</div>
             </div>
-            <!-- <div class="cart-item-price">{{ calculateTotalPrice(item) }}円</div> -->
-            <div class="cart-item-product-id">{{ item.product_id }}</div>
           </div>
         </div>
       </div>
-      <div class="cart-summary">
-        <p class="cart-total-count">購入点数: {{ totalItemCount }}個</p>
-        <p class="cart-total-price">合計価格: {{ totalCartPrice }}円</p>
-      </div>
+    </div>
+    <div class="cart-summary">
+      <p class="cart-total-count">購入点数: {{ totalItemCount }}個</p>
+      <p class="cart-total-price">合計価格: {{ totalCartPrice }}円</p>
     </div>
     <div class="cart-after-container">
       <button class="cart-next-link-box" @click="navigateToCustomerInfo">
@@ -48,39 +49,59 @@
     </div>
   </main>
 </template>
+
 <script>
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, ref, onMounted, watch, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
-
   setup() {
     const cartStore = useCartStore();
     const cartItems = ref([]);
     const router = useRouter();
 
+    const getCounter = (productId) => {
+      return cartStore.getCounter(productId);
+    };
+
     onMounted(() => {
       cartItems.value = cartStore.getCartItems();
     });
 
-    const navigateToCustomerInfo = () => {
-      router.push('/customer');
-    };
+    watch(() => cartStore.cartItems, (newCartItems) => {
+      cartItems.value = newCartItems;
+    });
+
+    const totalItemCount = computed(() => {
+      return cartItems.value.reduce((total, item) => total + getCounter(item.product_id), 0);
+    });
+
+    const totalCartPrice = computed(() => {
+      return cartItems.value.reduce((total, item) => total + item.price * getCounter(item.product_id), 0);
+    });
 
     const removeFromCart = (productId) => {
       cartStore.removeFromCart(productId);
       cartItems.value = cartStore.getCartItems();
     };
 
+    const navigateToCustomerInfo = () => {
+      router.push('/customer');
+    };
+
     return {
       cartItems,
+      getCounter,
       removeFromCart,
       navigateToCustomerInfo,
+      totalItemCount,
+      totalCartPrice,
     };
   },
 });
 </script>
+
 <style lang="scss">
 main {
   background: #fff;

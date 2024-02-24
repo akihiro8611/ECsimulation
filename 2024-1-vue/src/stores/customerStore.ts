@@ -36,6 +36,7 @@ export const useCustomerFormStore = defineStore('customerForm', {
       { id: 4, label: "セキュリティーコード", name: "securityCode", value: '' }
     ],
   }),
+  
 
   actions: {
     setFieldValue(fieldName, value) {

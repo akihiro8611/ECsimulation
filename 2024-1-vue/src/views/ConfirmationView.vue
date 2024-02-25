@@ -36,18 +36,18 @@
       </div>
     </div>
   </div>
-  <div v-for="item in cartItems" :key="item.product_id" class="cart-item-box">
-    <div class="cart-item-photo-box">
-      <img :src="item.image" alt="" class="cart-item-photo">
-    </div>
-    <div class="cart-item-text-box">
-      <h2 class="cart-item-title">{{ item.product_name }}</h2>
-      <div class="cart-item-explanation">{{ item.description }}</div>
-      <div class="cart-item-count-contents">
-        <div class="item-count-box">
-          <div class="item-count">
-            <!-- <span>数量: {{ getCounter(item.product_id) }}</span> -->
-            <!-- ↑ここでエラーが出ている -->
+  <div class="confirmation-item-contener">
+    <h1 class="item-contener-title">注文商品</h1>
+    <div v-for="item in cartItems" :key="item.product.product_id" class="confirmation-item-box">
+      <div class="confirmation-item-photo-box">
+        <img :src="item.product.image" alt="" class="confirmation-item-photo">
+      </div>
+      <div class="confirmation-item-text-box">
+        <h2 class="confirmation-item-title">{{ item.product.product_name }}</h2>
+        <div class="confirmation-item-count-contents">
+          <div class="confirmation-item-count">
+            <span>数量: {{ item.quantity }}</span>
+            <span>金額: {{ item.quantity*item.product.price }}</span>
           </div>
         </div>
       </div>
@@ -77,3 +77,35 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+.confirmation-item-contener{
+  display: inline-block;
+  width: 100vw;
+  max-width: 1280px;
+  margin-left: 100px;
+}
+.confirmation-item-box{
+  width: 75%;
+  height: 240px;
+  display: flex;
+  border-top:1px solid #000;
+  gap: 100px;
+  padding: 20px;
+}
+.confirmation-item-photo{
+  height: 100%;
+  object-fit: contain;
+}
+.confirmation-item-text-box{
+  font-size: 32px;
+}
+.confirmation-item-title{
+  font-size: 36px;
+}
+.confirmation-item-count{
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+}
+</style>

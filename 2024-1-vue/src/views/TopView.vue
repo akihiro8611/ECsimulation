@@ -77,9 +77,14 @@ export default {
     
     onMounted(fetchProducts);
 
+    
     const increment = (productId) => counterStore.increment(productId);
-    const decrement = (productId) => counterStore.decrement(productId);
-    const reset = (productId) => counterStore.reset(productId);
+    const decrement = (productId) => {
+      const currentCounter = counterStore.getCounter(productId);
+      if (currentCounter > 0) {
+        counterStore.decrement(productId);
+      }
+    };    const reset = (productId) => counterStore.reset(productId);
     const getCounter = (productId) => counterStore.getCounter(productId);
 
     const addToCart = async (productId) => {
@@ -90,9 +95,8 @@ export default {
         return;
       }
 
-      // カートストアに商品を追加する際、数量も取得して一緒に渡す
       try {
-        const quantity = counterStore.getCounter(productId);
+        const quantity = counterStore.getCounter(productId); 
         await cartStore.addToCart({ productId, quantity, product: selectedProduct });
         console.log('Added to cart:', selectedProduct);
       } catch (error) {

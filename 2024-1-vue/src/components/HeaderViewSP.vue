@@ -2,7 +2,7 @@
   <div class="SP-header-contener">
     <div class="SP-header-wrapper">
       <div class="SP-header-logo">
-        <RouterLink to="/top">
+        <RouterLink to="/top" @click="closeMenu">
           <img src="../assets/LOGO TITLESP.png" alt="" class="SP-logo-fot">
         </RouterLink>
       </div>
@@ -24,7 +24,7 @@
     <div v-show="isMenuVisible" class="SP-header-inner-menu">
       <div class="SP-inner-link-wrapper">
         <div class="SP-inner-link-contents">
-          <div class="SP-inner-menu-box">
+          <div class="SP-inner-menu-box" @click="closeMenu">
             <a href="https://www.google.com/" class="SP-mypage-link">
               <div class="SP-menu-box-icon">
                 <img src="../assets/userW.png" alt="">
@@ -32,7 +32,7 @@
               </div>
             </a>
           </div>
-          <button class="SP-inner-menu-box">
+          <button class="SP-inner-menu-box" @click="closeMenu">
             <RouterLink to="/cart">
               <div class="SP-menu-box-icon">
               <img src="../assets/CartICon.png" alt="">
@@ -90,6 +90,9 @@ export default {
     toggleMenu() {
       console.log('toggleMenu is called');
       this.isMenuVisible = !this.isMenuVisible;
+    },
+    closeMenu() {
+      this.isMenuVisible = false;
     },
   },
 };

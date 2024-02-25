@@ -2,7 +2,7 @@
   <main>
     <div class="header-contener">
       <div class="header-logo">
-        <RouterLink to="/top">
+        <RouterLink to="/top" @click="closeMenu">
           <img src="../assets/logo_title.png" alt="" class="logo-fot">
         </RouterLink>
       </div>
@@ -32,9 +32,9 @@
     <div v-show="isMenuVisible" class="header-inner-menu">
       <button @click="closeMenu" class="inner-close"></button>
       <div class="inner-link-contents">
-        <button class="inner-menu-box">
+        <button class="inner-menu-box" @click="closeMenu">
           <RouterLink to="/cart">
-            <div class="menu-box-icon">
+            <div class="menu-box-icon ">
               <img src="../assets/CartICon.png" alt="">
             </div>
             <div class="menu-box-text">

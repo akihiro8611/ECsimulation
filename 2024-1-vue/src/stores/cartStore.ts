@@ -1,4 +1,3 @@
-
 import { defineStore } from 'pinia';
 
 export const useCartStore = defineStore('cartStore', {
@@ -8,12 +7,20 @@ export const useCartStore = defineStore('cartStore', {
   }),
   actions: {
     // カートに商品を追加
-    addToCart(product) {
-      this.cartItems.push(product);
+    addToCart({ productId, quantity, product }) {
+      // 商品情報をオブジェクトとして作成
+      const newCartItem = {
+        productId,
+        quantity,
+        product,
+      };
+
+      // カート内の商品リストに新しい商品を追加
+      this.cartItems.push(newCartItem);
     },
     // カートから商品を削除
     removeFromCart(productId) {
-      this.cartItems = this.cartItems.filter(item => item.product_id !== productId);
+      this.cartItems = this.cartItems.filter(item => item.productId !== productId);
     },
     // カート内の商品を取得
     getCartItems() {

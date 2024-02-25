@@ -6,32 +6,31 @@
         <p>カートにアイテムがありません。</p>
       </div>
       <div class="cart-item-wrapper">
-        <div v-for="item in cartItems" :key="item.product_id" class="cart-item-box">
-          <div v-if="getCounter(item.product_id) > 0">
-            <div class="cart-item-photo-box">
-              <img :src="item.image" :alt="item.product_name" class="cart-item-photo">
-            </div>
-            <div class="cart-item-text-box">
-              <h2 class="cart-item-title">{{ item.product_name }}</h2>
-              <div class="cart-item-explanation">{{ item.description }}</div>
-              <div class="cart-item-count-contents">
-                <div class="item-count-box">
-                  <div class="item-count">
-                    <button class="item-count-button" @click="decrement(item.product_id)">
-                      <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
-                    </button>
-                    {{ quantity(item.product_id) }}
-                    <button class="item-count-button" @click="increment(item.product_id)">
-                      <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
-                    </button>
-                  </div>
-                  <div class="dust-box" @click="reset(item.product_id)">
-                    <img src="../assets/Vector.png" alt="" class="item-count-icon">
-                  </div>
+        <div v-for="item in cartItems" :key="item.product.product_id" class="cart-item-box">
+          <div class="cart-item-photo-box">
+            <img :src="item.product.image" :alt="item.product.product_name" class="cart-item-photo">
+          </div>
+          <div class="cart-item-text-box">
+            <h2 class="cart-item-title">{{ item.product.product_name }}</h2>
+            <div class="cart-item-explanation">{{ item.product.description }}</div>
+            <div class="cart-item-count-contents">
+              <div class="item-count-box">
+                <div class="item-count">
+                  <button class="item-count-button" @click="decrement(item.product.product_id)">
+                    <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
+                  </button>
+                  {{ item.quantity }}
+                  <button class="item-count-button" @click="increment(item.product.product_id)">
+                    <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
+                  </button>
+                </div>
+                <div class="dust-box" @click="reset(item.product.product_id)">
+                  <img src="../assets/Vector.png" alt="" class="item-count-icon">
                 </div>
               </div>
-              <div class="cart-item-product-id">{{ item.product_id }}</div>
             </div>
+            <div class="cart-item-price">{{ item.product.price * item.quantity }}円</div>
+            <div class="cart-item-product-id">{{ item.product.product_id }}</div>
           </div>
         </div>
       </div>
@@ -50,23 +49,39 @@
   </main>
 </template>
 
+
 <script>
-import { defineComponent, ref, onMounted, watch, computed } from 'vue';
+import { defineComponent, ref, onMounted, watch, computed, toRaw } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
+import { useItemCountStore } from '@/stores/counterStore';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
   setup() {
     const cartStore = useCartStore();
+    const counterStore = useItemCountStore();
     const cartItems = ref([]);
     const router = useRouter();
 
+    const increment = async (productId) => {
+      const currentCounter = cartStore.getCounter(productId);
+      await cartStore.addToCart({ productId, quantity: currentCounter + 1 });
+    };
+
+    const decrement = async (productId) => {
+      const currentCounter = cartStore.getCounter(productId);
+      if (currentCounter > 0) {
+        await cartStore.addToCart({ productId, quantity: currentCounter - 1 });
+      }
+    };
     const getCounter = (productId) => {
       return cartStore.getCounter(productId);
     };
+    const reset = (productId) => counterStore.reset(productId);
 
     onMounted(() => {
       cartItems.value = cartStore.getCartItems();
+      console.log('Cart Items:', toRaw(cartItems.value));
     });
 
     watch(() => cartStore.cartItems, (newCartItems) => {
@@ -74,16 +89,28 @@ export default defineComponent({
     });
 
     const totalItemCount = computed(() => {
-      return cartItems.value.reduce((total, item) => total + getCounter(item.product_id), 0);
+      return cartItems.value.reduce((total, item) => total + item.quantity, 0);
     });
 
     const totalCartPrice = computed(() => {
-      return cartItems.value.reduce((total, item) => total + item.price * getCounter(item.product_id), 0);
+      return cartItems.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
     });
 
-    const removeFromCart = (productId) => {
-      cartStore.removeFromCart(productId);
-      cartItems.value = cartStore.getCartItems();
+    const addToCart = async (productId) => {
+      const selectedProduct = cartItems.value.find(item => item.product.product_id === productId);
+
+      if (!selectedProduct) {
+        console.error('Product not found with productId:', productId);
+        return;
+      }
+
+      try {
+        const quantity = cartStore.getCounter(productId);
+        await cartStore.addToCart({ productId, quantity, product: toRaw(selectedProduct.product) });
+        console.log('Added to cart:', toRaw(selectedProduct.product));
+      } catch (error) {
+        console.error('Error adding to cart:', error);
+      }
     };
 
     const navigateToCustomerInfo = () => {
@@ -93,7 +120,10 @@ export default defineComponent({
     return {
       cartItems,
       getCounter,
-      removeFromCart,
+      increment,
+      decrement,
+      reset,
+      addToCart,
       navigateToCustomerInfo,
       totalItemCount,
       totalCartPrice,
@@ -101,6 +131,8 @@ export default defineComponent({
   },
 });
 </script>
+
+
 
 <style lang="scss">
 main {

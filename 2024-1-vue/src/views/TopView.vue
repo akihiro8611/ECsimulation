@@ -2,7 +2,7 @@
   <main>
     <section class="top-banner-contenner">
       <div class="top-banner-wrapper">
-        <img src="@/assets/banner.png" alt="" class="top-banner-fot">
+        <img src="@/assets/banner.png" alt="" class="top-banner-photo">
       </div>
     </section>
     <section class="top-item-contenner">
@@ -17,18 +17,7 @@
             <div class="item-explanation">{{ product.description }}</div>
           </div>
           <div class="item-count-box">
-            <div class="item-count">
-              <button class="item-count-button" @click="decrement(product.product_id)">
-                <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
-              </button>
-              {{ getCounter(product.product_id) }}
-              <button class="item-count-button" @click="increment(product.product_id)">
-                <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
-              </button>
-            </div>
-            <div class="dust-box" @click="reset(product.product_id)">
-              <img src="../assets/Vector.png" alt="" class="item-count-icon">
-            </div>
+            <ItemCount :productId="product.product_id" :price="product.price"/>
           </div>
           <div class="cart-in-box">
             <button class="top-cart-in-button" @click="addToCart(product.product_id)">
@@ -51,20 +40,20 @@
 </template>
 
 <script>
-import { ref, onMounted, } from 'vue';
+import { ref, onMounted } from 'vue';
+import ItemCount from '@/components/ItemCount.vue';
 import { useProductStore } from '@/stores/productStore';
-// import ItemCount from '@/components/ItemCount.vue';
-import { useItemCountStore } from '@/stores/counterStore.ts';
 import { useCartStore } from '@/stores/cartStore.ts';
 
 export default {
-  props: ['product'],
-  setup() {    
+  components: {
+    ItemCount,
+  },
+  setup() {
     const productStore = useProductStore();
-    const counterStore = useItemCountStore();
     const cartStore = useCartStore();
     const products = ref([]);
-    
+
     const fetchProducts = async () => {
       try {
         await productStore.fetchProducts();
@@ -74,21 +63,12 @@ export default {
         console.error('Error fetching products:', error);
       }
     };
-    
-    onMounted(fetchProducts);
 
-    
-    const increment = (productId) => counterStore.increment(productId);
-    const decrement = (productId) => {
-      const currentCounter = counterStore.getCounter(productId);
-      if (currentCounter > 0) {
-        counterStore.decrement(productId);
-      }
-    };    const reset = (productId) => counterStore.reset(productId);
-    const getCounter = (productId) => counterStore.getCounter(productId);
+    onMounted(fetchProducts);
 
     const addToCart = async (productId) => {
       const selectedProduct = products.value.find(product => product.product_id === productId);
+      console.log('Selected Product:', selectedProduct);
 
       if (!selectedProduct) {
         console.error('Product not found with productId:', productId);
@@ -96,16 +76,18 @@ export default {
       }
 
       try {
-        const quantity = counterStore.getCounter(productId); 
+        const quantity = selectedProduct.quantity; 
+        console.log('Quantity from CounterStore:', quantity);// 商品に quantity プロパティがあれば使用し、なければ 0 をデフォルトとする
         await cartStore.addToCart({ productId, quantity, product: selectedProduct });
         console.log('Added to cart:', selectedProduct);
       } catch (error) {
         console.error('Error adding to cart:', error);
       }
     };
-    return { products, increment, decrement, reset, getCounter, addToCart,};
+
+    return { products, addToCart };
   },
-}
+};
 </script>
 
 <style lang="scss">
@@ -118,7 +100,7 @@ main {
   width: 100%;
   padding-top: 72px;
 }
-.top-banner-fot {
+.top-banner-photo {
   width: 100%;
   aspect-ratio: 1280/512;
 }
@@ -164,41 +146,7 @@ main {
 .item-explanation {
   margin-top: 32px;
 }
-.item-count-contents {
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 16px;
-}
-.item-count-box {
-  display: flex;
-  width: 157px;
-  padding: 4px 18px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 20px;
-  background: #FFF;
-}
-.item-count {
-  display: flex;
-  gap: 20px;
-  background: none;
-  border: none;
-}
-.item-count-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-.item-count-icon {
-  width: auto;
-}
-.dust-box {
-  width: auto;
-  margin-left: 20px;
-  cursor: pointer;
-}
+
 .top-cart-in-button {
   background-color: #d9d9d9;
   border-radius: 40px;
@@ -239,13 +187,11 @@ main {
 .item-count-box {
   display: flex;
   flex-direction: row;
-  width: fit-content;
-  padding: 4px 18px;
   align-items: center;
   border-radius: 20px;
   background: #FFF;
-  gap: 16px;
 }
+
 .item-count {
   display: flex;
   gap: 20px;
@@ -265,6 +211,7 @@ main {
   margin-left: 20px;
   cursor: pointer;
 }
+
 @media screen and (min-width: 768px) {
   .top-item-contenner {
     padding: 32px 0px;
@@ -290,6 +237,7 @@ main {
   .item-text-box {
     width: fit-content;
   }
+
   .top-cart-in-button {
     height: 40px;
     padding: 0 16px;
@@ -346,27 +294,6 @@ main {
     font-size: 8px;
     margin-top: 8px;
   }
-  .item-count-contents {
-    margin-top: 8px;
-    gap: 8px;
-  }
-  .item-count-box {
-    width: 119px;
-    padding: 0 12px;
-  }
-  .item-count {
-    gap: 12px;
-  }
-  .item-count-button {
-    cursor: pointer;
-  }
-  .item-count-icon {
-    width: 12px;
-    height: 12px;
-  }
-  .dust-box {
-    margin-left: 12px;
-  }
   .top-cart-in-button {
     height: fit-content;
     padding: 0 12px;
@@ -399,26 +326,6 @@ main {
   .open_item {
     width: 36px;
     height: 36px;
-  }
-
-  .item-count-contents {
-    margin-top: 32px;
-  }
-  .item-count-box {
-    width: 157px;
-    padding: 4px 18px;
-  }
-  .item-count {
-    gap: 20px;
-  }
-  .item-count-button {
-    cursor: pointer;
-  }
-  .item-count-icon {
-    width: auto;
-  }
-  .dust-box {
-    margin-left: 20px;
   }
 }
 </style>

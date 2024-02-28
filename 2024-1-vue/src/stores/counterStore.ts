@@ -1,44 +1,31 @@
+// counterStore.ts
+
 import { defineStore } from 'pinia';
 
-export const useItemCountStore = defineStore('itemCountStore', {
-  // ストアの初期状態を定義
+export const useItemCountStore = defineStore('counterStore', {
   state: () => ({
-    counters: {}, // 各商品のカウンターを保持するオブジェクト
+    counters: {},
   }),
-  // ストアのアクション（メソッド）を定義
   actions: {
-    // カウンターを初期化するメソッド
-    initializeCounter(product_id) {
-      // カウンターがまだ存在しない場合、0で初期化
-      if (!this.counters[product_id]) {
-        this.counters[product_id] = 0;
+      getCounter(productId) {
+        const counterValue = this.counters[productId] || 0;
+        console.log(`Getting counter for productId ${productId}: ${counterValue}`); // デバッグログを追加
+        return counterValue;
+      },
+    increment(productId) {
+      if (!this.counters[productId]) {
+        this.counters[productId] = 1;
+      } else {
+        this.counters[productId]++;
       }
     },
-    // カウンターを増やすメソッド
-    increment(product_id) {
-      // カウンターを初期化してから増加
-      this.initializeCounter(product_id);
-      this.counters[product_id]++;
+    decrement(productId) {
+      if (this.counters[productId] && this.counters[productId] > 0) {
+        this.counters[productId]--;
+      }
     },
-    // カウンターを減らすメソッド
-    decrement(product_id) {
-      // カウンターを初期化してから減少
-      this.initializeCounter(product_id);
-      this.counters[product_id]--;
+    reset(productId) {
+      this.counters[productId] = 0;
     },
-    // カウンターをリセットするメソッド
-    reset(product_id) {
-      // カウンターを初期化してからリセット
-      this.initializeCounter(product_id);
-      this.counters[product_id] = 0;
-    },
-    // カウンターの値を取得するメソッド
-    getCounter(product_id) {
-      // カウンターを初期化してから値を取得
-      this.initializeCounter(product_id);
-      return this.counters[product_id];
-    }
   },
 });
-
-export default useItemCountStore;

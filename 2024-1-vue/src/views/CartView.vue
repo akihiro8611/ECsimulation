@@ -14,23 +14,18 @@
             <h2 class="cart-item-title">{{ item.product.product_name }}</h2>
             <div class="cart-item-explanation">{{ item.product.description }}</div>
             <div class="cart-item-count-contents">
-              <div class="item-count-box">
-                <div class="item-count">
-                  <button class="item-count-button" @click="decrement(item.product.product_id)">
-                    <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
-                  </button>
-                  {{ item.quantity }}
-                  <button class="item-count-button" @click="increment(item.product.product_id)">
-                    <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
-                  </button>
-                </div>
-                <div class="dust-box" @click="reset(item.product.product_id)">
-                  <img src="../assets/Vector.png" alt="" class="item-count-icon">
+              <div class="cart-item-count-box">
+                <div class="item-count-box">
+                  <!-- quantity プロパティを追加 -->
+                  <ItemCount :productId="item.product.product_id" :price="item.product.price" :quantity="item.quantity" />
+                  {{ console.log('Quantity in Cart.vue:', item.quantity) }}
                 </div>
               </div>
             </div>
-            <div class="cart-item-price">{{ item.product.price * item.quantity }}円</div>
-            <div class="cart-item-product-id">{{ item.product.product_id }}</div>
+            <!-- 各商品の値段とカウント数を掛け算した合計価格を表示 -->
+            <div class="cart-item-price">{{ itemTotalPrice(item) }}円</div>
+            <!-- 各商品の合計価格を表示 -->
+            <div class="cart-item-product-id">{{ calculateTotalPrice(item) }}円</div>
           </div>
         </div>
       </div>
@@ -49,84 +44,82 @@
   </main>
 </template>
 
-
 <script>
 import { defineComponent, ref, onMounted, watch, computed, toRaw } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useItemCountStore } from '@/stores/counterStore';
 import { useRouter } from 'vue-router';
+import ItemCount from '@/components/ItemCount.vue';
 
 export default defineComponent({
+  components: {
+    ItemCount,
+  },
   setup() {
     const cartStore = useCartStore();
     const counterStore = useItemCountStore();
     const cartItems = ref([]);
     const router = useRouter();
 
-    const increment = async (productId) => {
-      const currentCounter = cartStore.getCounter(productId);
-      await cartStore.addToCart({ productId, quantity: currentCounter + 1 });
-    };
-
-    const decrement = async (productId) => {
-      const currentCounter = cartStore.getCounter(productId);
-      if (currentCounter > 0) {
-        await cartStore.addToCart({ productId, quantity: currentCounter - 1 });
-      }
-    };
-    const getCounter = (productId) => {
-      return cartStore.getCounter(productId);
-    };
-    const reset = (productId) => counterStore.reset(productId);
-
     onMounted(() => {
       cartItems.value = cartStore.getCartItems();
       console.log('Cart Items:', toRaw(cartItems.value));
-    });
+      });
 
     watch(() => cartStore.cartItems, (newCartItems) => {
       cartItems.value = newCartItems;
     });
 
     const totalItemCount = computed(() => {
-      return cartItems.value.reduce((total, item) => total + item.quantity, 0);
+      return cartItems.value.reduce((total, item) => total + (item.quantity || 0), 0);
     });
 
     const totalCartPrice = computed(() => {
-      return cartItems.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
+      return cartItems.value.reduce((total, item) => total + (item.product.price * (item.quantity || 0)), 0);
     });
 
     const addToCart = async (productId) => {
-      const selectedProduct = cartItems.value.find(item => item.product.product_id === productId);
+      const selectedProduct = products.value.find(product => product.product_id === productId);
+        console.log('Selected Product:', selectedProduct);
 
-      if (!selectedProduct) {
-        console.error('Product not found with productId:', productId);
-        return;
-      }
+  if (!selectedProduct) {
+    console.error('Product not found with productId:', productId);
+    return;
+  }
 
-      try {
-        const quantity = cartStore.getCounter(productId);
-        await cartStore.addToCart({ productId, quantity, product: toRaw(selectedProduct.product) });
-        console.log('Added to cart:', toRaw(selectedProduct.product));
-      } catch (error) {
-        console.error('Error adding to cart:', error);
-      }
-    };
+  try {
+    // quantity プロパティを追加
+    const quantity = counterStore.getCounter(productId) || 0;
+    console.log('Quantity from CounterStore:', quantity); // ログを追加
+    await cartStore.addToCart({ productId, quantity, product: toRaw(selectedProduct.product) });
+    console.log('Added to cart:', toRaw(selectedProduct.product));
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+  }
+};
 
     const navigateToCustomerInfo = () => {
       router.push('/customer');
     };
 
+    // 各商品の合計価格を計算するメソッド
+    const itemTotalPrice = (item) => {
+      return (item.product.price * (item.quantity || 0));
+    };
+
+    // 各商品の合計価格を表示するメソッド
+    const calculateTotalPrice = (item) => {
+      return itemTotalPrice(item);
+    };
+
     return {
       cartItems,
-      getCounter,
-      increment,
-      decrement,
-      reset,
       addToCart,
       navigateToCustomerInfo,
       totalItemCount,
       totalCartPrice,
+      itemTotalPrice,
+      calculateTotalPrice,
     };
   },
 });
@@ -134,11 +127,12 @@ export default defineComponent({
 
 
 
+
+
 <style lang="scss">
 main {
   background: #fff;
   color: #333;
-  padding-top: 72px;
 }
 
 .cart-container {
@@ -176,6 +170,8 @@ main {
   width: 90%;
   aspect-ratio: 288/192;
   margin: 0 auto;
+  object-fit: contain;
+
 }
 .cart-item-text-box {
   width: fit-content;
@@ -189,47 +185,6 @@ main {
 .cart-item-explanation {
   margin-top: 32px;
 }
-.cart-item-count-contents {
-  margin-top: 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 16px;
-}
-
-.cart-item-count-box {
-  display: flex;
-  width: fit-content;
-  padding: 4px 18px;
-  justify-content: center;
-  align-items: center;
-  border-radius: 20px;
-  background: #FFF;
-}
-
-.cart-item-count {
-  display: flex;
-  gap: 20px;
-  background: none;
-  border: none;
-}
-
-.cart-item-count-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.cart-item-count-icon {
-  width: auto;
-}
-
-.cart-dust-box {
-  width: auto;
-  margin-left: 20px;
-  cursor: pointer;
-}
-
 .cart-in-box {
   text-align: right;
 }
@@ -336,7 +291,6 @@ main {
     column-gap: 18px;
     row-gap: 20px;
     margin-top: 20px;
-    aspect-ratio: 165/263;
   }
   .cart-item-photo {
   width: 90%;
@@ -346,39 +300,20 @@ main {
   .cart-item-box {
     width: calc(80% / 2);
     padding: 8px;
+    height: fit-content;
   }
-
+  .cart-item-text-box{
+    width: 90%;
+  }
   .cart-item-title {
     font-size: 12px;
+    font-size: 12px;
   }
-
-  .cart-item-count-contents {
+  .cart-item-explanation{
+    font-size: 8px;
     margin-top: 8px;
-    gap: 8px;
   }
-
-  .cart-item-count-box {
-    width: 119px;
-    padding: 0 12px;
-  }
-
-  .cart-item-count {
-    gap: 12px;
-  }
-
-  .cart-item-count-button {
-    cursor: pointer;
-  }
-
-  .cart-item-count-icon {
-    width: 12px;
-    height: 12px;
-  }
-
-  .dust-box {
-    margin-left: 12px;
-  }
-
+ 
   .cart-in-button {
     height: fit-content;
     padding: 0 12px;
@@ -386,7 +321,7 @@ main {
   }
 
   .cart-item-price {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .cart-total-count {

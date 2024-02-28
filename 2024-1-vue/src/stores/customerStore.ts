@@ -63,5 +63,15 @@ export const useCustomerFormStore = defineStore('customerForm', {
       this.bankTypes = customerInfo.bankTypes;
       this.creditFields = customerInfo.creditFields;
     },
+    validateEmail() {
+      const emailField = this.fields.find(f => f.name === "email");
+      if (emailField) {
+        // メールアドレスの正規表現
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        // メールアドレスが正しいフォーマットでない場合にエラーを設定
+        emailField.error = !emailRegex.test(emailField.value.trim());
+      }
+    },
   },
 });

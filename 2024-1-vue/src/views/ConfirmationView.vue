@@ -1,21 +1,21 @@
 <template>
-  <div class="customer-container">
-    <h1 class="customer-container-title"></h1>
-    <div class="customer-information">
-      <div v-for="field in store.fields" :key="field.id" class="import-box">
-        <div class="import-title-text">{{ field.label }}</div>
-        <div class="import-out-text">{{ field.value }}</div>
+  <div class="confirmation-customer-container">
+    <div class="confirmation-information">
+      <h2 class="confirmation-sub-title">お客様情報</h2>
+      <div v-for="field in store.fields" :key="field.id" class="confirmation-form-box">
+        <div class="confirmation-import-title-text">{{ field.label }} :  {{ field.value }}</div>
       </div>
     </div>
-    <div>
-      <div class="payment-serect">
-        <div v-if="store.selectedOption === 'bank'" class="category-contents">
+    <div class="confirmation-information">
+      <div class="confirmation-payment-serect">
+        <h2 class="confirmation-sub-title">お支払い情報</h2>
+        <div v-if="store.selectedOption === 'bank'" class="confirmation-category-contents">
           <!-- bank の情報を表示 -->
-          <div class="bank-payment-information">
-            <div v-for="field in store.bankFields" :key="field.id" class="payment-form-box">
-              <div class="import-title-text">{{ field.label }}</div>
-              <div class="import-out-text">{{ field.value }}</div>
-              <div v-if="field.id === 1" class="bank-type-select">
+          <div class="confirmation-bank-payment-information">
+            <div v-for="field in store.bankFields" :key="field.id" class="confirmation-form-box">
+              <div class="confirmation-import-title-text">{{ field.label }}</div>
+              <div class="confirmation-import-out-text">{{ field.value }}</div>
+              <div v-if="field.id === 1" class="confirmation-bank-type-select">
                 <div v-for="bankType in store.bankTypes" :key="bankType.value">
                   <input type="radio" :id="bankType.value" :name="bankType.name" :value="bankType.value" v-model="bankType.checked">
                   <label :for="bankType.value">{{ bankType.label }}</label>
@@ -24,12 +24,12 @@
             </div>
           </div>
         </div>
-        <div v-else-if="store.selectedOption === 'credit'" class="category-contents">
+        <div v-else-if="store.selectedOption === 'credit'" class="confirmation-category-contents">
           <!-- credit の情報を表示 -->
-          <div class="credit-payment-information">
-            <div v-for="field in store.creditFields" :key="field.id" class="payment-form-box">
-              <div class="import-title-text">{{ field.label }}</div>
-              <div class="import-out-text">{{ field.value }}</div>
+          <div class="confirmation-credit-payment-information">
+            <div v-for="field in store.creditFields" :key="field.id" class="confirmation-form-box">
+              <div class="confirmation-import-title-text">{{ field.label }}</div>
+              <div class="confirmation-import-out-text">{{ field.value }}</div>
             </div>
           </div>
         </div>
@@ -52,11 +52,15 @@
         </div>
       </div>
     </div>
+    <div class="confirmation-cart-summary">
+      <p class="confirmation-cart-total-count">購入点数: {{ totalItemCount }}個</p>
+      <p class="confirmation-cart-total-price">合計価格: {{ totalCartPrice }}円</p>
+    </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, } from 'vue';
+import { defineComponent, ref, onMounted,computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useCustomerFormStore } from '@/stores/customerStore';
 
@@ -70,20 +74,47 @@ export default defineComponent({
       cartItems.value = cartStore.getCartItems();
     });
 
+    const totalItemCount = computed(() => {
+      return cartItems.value.reduce((total, item) => total + item.quantity, 0);
+    });
+
+    const totalCartPrice = computed(() => {
+      return cartItems.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    });
+
     return {
       cartItems,
       store,
+      totalItemCount,
+      totalCartPrice,
     };
   },
 });
 </script>
 
 <style>
-.confirmation-item-contener{
-  display: inline-block;
-  width: 100vw;
-  max-width: 1280px;
-  margin-left: 100px;
+.confirmation-customer-container{
+  padding-top: 100px;
+  display: flex;
+  justify-content: center;
+  
+}
+.confirmation-sub-title{
+  font-size: 32px;
+}
+.confirmation-import-title-text{
+  font-size: 24px;
+}
+.confirmation-information{
+  width: calc(75%/2);
+  border: 1px solid #000;
+  padding: 20px;
+}
+.confirmation-information:last-of-type{
+  margin-left: 40px;
+}
+.confirmation-form-box{
+  margin-top: 12px;
 }
 .confirmation-item-box{
   width: 75%;
@@ -92,6 +123,13 @@ export default defineComponent({
   border-top:1px solid #000;
   gap: 100px;
   padding: 20px;
+}
+.confirmation-bank-type-select{
+  display: flex;
+  margin-top: 12px;
+}
+.confirmation-item-box:last-of-type {
+  border-bottom:1px solid #000;
 }
 .confirmation-item-photo{
   height: 100%;
@@ -103,9 +141,91 @@ export default defineComponent({
 .confirmation-item-title{
   font-size: 36px;
 }
+.confirmation-item-contener{
+  display: inline-block;
+  width: 100vw;
+  max-width: 1280px;
+  padding-left: 10%;
+  margin-top: 40px;
+}
 .confirmation-item-count{
   display: flex;
   flex-direction: column;
   justify-content: left;
+}
+.confirmation-cart-summary{
+  text-align: right;
+  margin: 20px 20% 40px auto;
+  font-size: 36px;
+}
+@media screen and (max-width: 767px) {
+  .confirmation-customer-container{
+  padding-top: 100px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+
+  
+  }
+  .confirmation-sub-title{
+    font-size: 24px;
+  }
+  .confirmation-import-title-text{
+    font-size: 18px;
+  }
+  .confirmation-information{
+    width: 80%;
+    border: 1px solid #000;
+    padding: 20px;
+  }
+  .confirmation-information:last-of-type{
+    margin-left: 0;
+    margin-top: 20px;
+  }
+  .confirmation-form-box{
+    margin-top: 12px;
+  }
+  .confirmation-item-contener{
+    display: inline-block;
+    width: 100vw;
+    padding-left: 10%;
+    margin-top: 20px;
+  }
+  .item-contener-title{
+    font-size: 24px;
+  }
+  .confirmation-item-box{
+    width: 75%;
+    height: 240px;
+    display: flex;
+    border-top:1px solid #000;
+    gap: 100px;
+    padding: 20px;
+  }
+  .confirmation-item-box:last-of-type {
+    border-bottom:1px solid #000;
+  }
+  .confirmation-item-photo{
+    height: 100%;
+    object-fit: contain;
+  }
+  .confirmation-item-text-box{
+    font-size: 24px;
+  }
+  .confirmation-item-title{
+    font-size: 24px;
+  }
+  .confirmation-item-count{
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+  }
+  .confirmation-cart-summary{
+    text-align: right;
+    margin: 20px 0;
+    padding-right: 10%;
+    font-size: 18px;
+  }
 }
 </style>

@@ -12,13 +12,13 @@
     <div class="dust-box" @click="reset">
       <img src="../assets/Vector.png" alt="" class="item-count-icon">
     </div>
-    <div class="total-price">Total Price: {{ totalProductPrice }}</div>
   </div>
 </template>
 
 <script>
 import { ref, onMounted } from 'vue';
 import { useItemCountStore } from '@/stores/counterStore.ts';
+import { useCartStore } from '@/stores/cartStore.ts';
 
 export default {
   props: {
@@ -26,57 +26,46 @@ export default {
       type: String,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
   },
   setup(props) {
     const counterStore = useItemCountStore();
+    const cartStore = useCartStore();
+
     const counter = ref(counterStore.getCounter(props.productId));
-    const quantity = ref(0);
-    const totalProductPrice = ref(0);
+
+    // 関数を定義
+    const updateCartStore = () => {
+      cartStore.updateQuantity({ productId: props.productId, quantity: counter.value });
+    };
 
     const increment = () => {
       counterStore.increment(props.productId);
       counter.value = counterStore.getCounter(props.productId);
-      quantity.value = counter.value;
-      updateTotal();
+      updateCartStore();
     };
 
     const decrement = () => {
       counterStore.decrement(props.productId);
       counter.value = counterStore.getCounter(props.productId);
-      quantity.value = counter.value;
-      updateTotal();
+      updateCartStore();
     };
 
     const reset = () => {
       counterStore.reset(props.productId);
       counter.value = counterStore.getCounter(props.productId);
-      quantity.value = counter.value;
-      updateTotal();
-    };
-
-    const updateTotal = () => {
-      totalProductPrice.value = counter.value * props.price;
+      updateCartStore();
     };
 
     onMounted(() => {
       counter.value = counterStore.getCounter(props.productId);
-      quantity.value = counter.value;
-      updateTotal();
     });
 
-    return { counter, increment, decrement, reset, totalProductPrice };
+    return { counter, increment, decrement, reset };
   },
 };
 </script>
 
 <style>
-.total-price{
-  display: none;
-}
 .item-count-contents {
   margin-top: 32px;
   display: flex;

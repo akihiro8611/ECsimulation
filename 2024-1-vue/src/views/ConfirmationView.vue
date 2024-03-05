@@ -60,24 +60,29 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted,computed } from 'vue';
+import { defineComponent, ref, onMounted, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useCustomerFormStore } from '@/stores/customerStore';
 
 export default defineComponent({
   setup() {
+    // カートストアとフォームストアを使用
     const cartStore = useCartStore();
     const cartItems = ref([]);
     const store = useCustomerFormStore();
 
+    // コンポーネントがマウントされた時の処理
     onMounted(() => {
+      // カートストアからカート内の商品情報を取得してcartItemsにセット
       cartItems.value = cartStore.getCartItems();
     });
 
+    // カート内の商品の総数量を計算するcomputedプロパティ
     const totalItemCount = computed(() => {
       return cartItems.value.reduce((total, item) => total + item.quantity, 0);
     });
 
+    // カート内の商品の総価格を計算するcomputedプロパティ
     const totalCartPrice = computed(() => {
       return cartItems.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
     });
@@ -91,6 +96,7 @@ export default defineComponent({
   },
 });
 </script>
+
 
 <style>
 .confirmation-customer-container{

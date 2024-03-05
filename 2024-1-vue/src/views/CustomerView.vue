@@ -99,12 +99,17 @@ const isEmailValid = (email) => {
 
 export default defineComponent({
   setup() {
+    // useCustomerFormStore フックを使ってフォームの状態を取得
     const store = useCustomerFormStore();
+    
+    // Vue Router を使用してルーティングを制御
     const router = useRouter();
 
+    // フォームのバリデーションを行い、確認画面に遷移するメソッド
     const validateAndNavigateToConfirmation = () => {
       // フォームの各フィールドに対してバリデーションを行う
       store.fields.forEach(field => {
+        // 空白の場合、エラーを設定
         field.error = field.value.trim() === '';
       });
 
@@ -112,12 +117,15 @@ export default defineComponent({
       const isFormValid = store.fields.every(field => field.value.trim() !== '' && (field.name !== 'email' || isEmailValid(field.value)));
 
       if (isFormValid) {
+        // フォームが有効であれば、確認画面に遷移
         router.push('/confirmation');
       } else {
+        // フォームが無効であればエラーを出力
         console.error('フォームが無効です。');
       }
     };
 
+    // 特定のフィールドがエラーを持っているかを判定するメソッド
     const fieldHasError = (field) => {
       return field.value.trim() === '' || (field.name === 'email' && !isEmailValid(field.value));
     };
@@ -130,6 +138,7 @@ export default defineComponent({
   },
 });
 </script>
+
 <style>
 .error-message{
   color: red;

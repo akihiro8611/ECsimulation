@@ -16,9 +16,7 @@
             <div class="cart-item-count-contents">
               <div class="cart-item-count-box">
                 <div class="item-count-box">
-                  <!-- quantity プロパティを追加 -->
-                  <ItemCount :productId="item.product.product_id" :price="item.product.price" :quantity="item.quantity" />
-                  {{ console.log('Quantity in Cart.vue:', item.quantity) }}
+                  <ItemCount :productId="item.product.product_id"/>
                 </div>
               </div>
             </div>
@@ -56,55 +54,73 @@ export default defineComponent({
     ItemCount,
   },
   setup() {
+    // カートストアと商品数量ストアを使用
     const cartStore = useCartStore();
     const counterStore = useItemCountStore();
+
+    // カート内の商品情報を保持するリアクティブな変数
     const cartItems = ref([]);
+    
+    // Vue Routerを使用してルーティングを制御
     const router = useRouter();
 
+    // コンポーネントがマウントされた時の処理
     onMounted(() => {
+      // カートストアからカート内の商品情報を取得してcartItemsにセット
       cartItems.value = cartStore.getCartItems();
       console.log('Cart Items:', toRaw(cartItems.value));
-      });
+    });
 
+    // カートストアの変更を監視し、cartItemsを更新
     watch(() => cartStore.cartItems, (newCartItems) => {
       cartItems.value = newCartItems;
     });
 
+    // カート内の商品の総数量を計算するcomputedプロパティ
     const totalItemCount = computed(() => {
       return cartItems.value.reduce((total, item) => total + (item.quantity || 0), 0);
     });
 
+    // カート内の商品の総価格を計算するcomputedプロパティ
     const totalCartPrice = computed(() => {
       return cartItems.value.reduce((total, item) => total + (item.product.price * (item.quantity || 0)), 0);
     });
 
+    // カートに商品を追加するメソッド
     const addToCart = async (productId) => {
+      // 商品IDに対応する商品をproductsから検索
       const selectedProduct = products.value.find(product => product.product_id === productId);
-        console.log('Selected Product:', selectedProduct);
 
-  if (!selectedProduct) {
-    console.error('Product not found with productId:', productId);
-    return;
-  }
+      if (!selectedProduct) {
+        // 該当する商品が見つからない場合はエラーを出力して処理を中断
+        console.error('Product not found with productId:', productId);
+        return;
+      }
 
-  try {
-    // quantity プロパティを追加
-    const quantity = counterStore.getCounter(productId) || 0;
-    console.log('Quantity from CounterStore:', quantity); // ログを追加
-    await cartStore.addToCart({ productId, quantity, product: toRaw(selectedProduct.product) });
-    console.log('Added to cart:', toRaw(selectedProduct.product));
-  } catch (error) {
-    console.error('Error adding to cart:', error);
-  }
-};
+      try {
+        // 商品数量ストアから商品の数量を取得
+        const quantity = counterStore.getCounter(productId) || 0;
+        console.log('Quantity from CounterStore:', quantity);
 
+        // カートストアの数量情報を更新
+        cartStore.updateQuantity({ productId, quantity });
+
+        console.log('Added to cart:', selectedProduct.product);
+      } catch (error) {
+        // エラーが発生した場合はエラーを出力
+        console.error('Error adding to cart:', error);
+      }
+    };
+
+    // 顧客情報入力画面に遷移するメソッド
     const navigateToCustomerInfo = () => {
+      // Vue Routerを使用して顧客情報入力画面に遷移
       router.push('/customer');
     };
 
     // 各商品の合計価格を計算するメソッド
     const itemTotalPrice = (item) => {
-      return (item.product.price * (item.quantity || 0));
+      return (item.quantity || 0) * item.product.price;
     };
 
     // 各商品の合計価格を表示するメソッド
@@ -313,7 +329,7 @@ main {
     font-size: 8px;
     margin-top: 8px;
   }
- 
+
   .cart-in-button {
     height: fit-content;
     padding: 0 12px;

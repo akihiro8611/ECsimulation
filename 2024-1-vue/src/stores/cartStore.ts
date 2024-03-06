@@ -7,27 +7,23 @@ export const useCartStore = defineStore('cartStore', {
   state: () => ({
     // カート内の商品情報を格納する配列
     cartItems: [],
+    // 商品ごとの数量を管理するcountersオブジェクト
+    counters: {},
   }),
 
   // アクションを定義
   actions: {
     // カートに商品を追加するアクション
     addToCart({ productId, quantity, product }) {
-      // 商品がカートに既に存在するかを確認
-      const existingItemIndex = this.cartItems.findIndex(item => item.productId === productId);
+      // 商品情報をオブジェクトとして作成
+      const newCartItem = {
+        productId,
+        quantity,
+        product,
+      };
 
-      if (existingItemIndex !== -1) {
-        // 既に存在する場合はその数量を加算
-        this.cartItems[existingItemIndex].quantity += quantity;
-      } else {
-        // 新しい商品としてカートに追加
-        const newCartItem = {
-          productId,
-          quantity,
-          product,
-        };
-        this.cartItems.push(newCartItem);
-      }
+      // カート内の商品リストに新しい商品を追加
+      this.cartItems.push(newCartItem);
     },
 
     // カートから商品を削除するアクション
@@ -48,14 +44,19 @@ export const useCartStore = defineStore('cartStore', {
       this.cartItems = [];
     },
 
-    // 商品の数量を更新するアクション
-    updateQuantity({ productId, quantity }) {
-      const itemIndex = this.cartItems.findIndex(item => item.productId === productId);
-
-      if (itemIndex !== -1) {
-        // 商品が存在する場合は数量を更新
-        this.cartItems[itemIndex].quantity = quantity;
+    // 特定の商品の数量を取得するアクション
+    getCounter(productId) {
+      // 商品ごとの数量が存在しない場合は0で初期化し、それを返す
+      if (!this.counters[productId]) {
+        this.counters[productId] = 0;
       }
+      return this.counters[productId];
+    },
+
+    // 特定の商品の数量を更新するアクション
+    updateQuantity({ productId, quantity }) {
+      // 商品ごとの数量を指定された数量に更新
+      this.counters[productId] = quantity;
     },
   },
 });

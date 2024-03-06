@@ -39,66 +39,66 @@
   </main>
 </template>
 <script>
-  import { ref, onMounted } from 'vue';
-  import ItemCount from '@/components/ItemCount.vue';
-  import { useProductStore } from '@/stores/productStore';
-  import { useCartStore } from '@/stores/cartStore.ts';
+import { ref, onMounted } from 'vue';
+import ItemCount from '@/components/ItemCount.vue';
+import { useProductStore } from '@/stores/productStore';
+import { useCartStore } from '@/stores/cartStore.ts';
 
-  export default {
-    components: {
-      ItemCount,
-    },
-    setup() {
-      // 商品情報を管理するストアを取得
-      const productStore = useProductStore();
-      // カート情報を管理するストアを取得
-      const cartStore = useCartStore();
-      // 商品データを保持するリアクティブな変数
-      const products = ref([]);
+export default {
+  components: {
+    ItemCount,
+  },
+  setup() {
+    // 商品情報を管理するストアを取得
+    const productStore = useProductStore();
+    // カート情報を管理するストアを取得
+    const cartStore = useCartStore();
+    // 商品データを保持するリアクティブな変数
+    const products = ref([]);
 
-      // 商品データを非同期で取得するメソッド
-      const fetchProducts = async () => {
-        try {
-          await productStore.fetchProducts();
-          console.log('Fetched products');
-          // 商品データをリアクティブ変数にセット
-          products.value = [...productStore.products];
-        } catch (error) {
-          console.error('Error fetching products:', error);
-        }
-      };
+    // 商品データを非同期で取得するメソッド
+    const fetchProducts = async () => {
+      try {
+        await productStore.fetchProducts();
+        console.log('Fetched products');
+        // 商品データをリアクティブ変数にセット
+        products.value = [...productStore.products];
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
 
-      // コンポーネントがマウントされた時に商品データを取得
-      onMounted(fetchProducts);
+    // コンポーネントがマウントされた時に商品データを取得
+    onMounted(fetchProducts);
 
-      // カートに商品を追加するメソッド
-      const addToCart = async (productId) => {
-        // 選択された商品を商品データから取得
-        const selectedProduct = products.value.find(product => product.product_id === productId);
-        console.log('Selected Product:', selectedProduct);
+    // カートに商品を追加するメソッド
+    const addToCart = async (productId) => {
+      // 選択された商品を商品データから取得
+      const selectedProduct = products.value.find(product => product.product_id === productId);
+      console.log('Selected Product:', selectedProduct);
 
-        if (!selectedProduct) {
-          // 該当する商品が見つからない場合はエラーを出力して処理を中断
-          console.error('Product not found with productId:', productId);
-          return;
-        }
+      if (!selectedProduct) {
+        // 該当する商品が見つからない場合はエラーを出力して処理を中断
+        console.error('Product not found with productId:', productId);
+        return;
+      }
 
-        try {
-          // カートストアから商品の数量を取得
-          const quantity = cartStore.getCounter(productId) || 0;
-          // カートストアに商品を追加する
-          await cartStore.addToCart({ productId, quantity, product: selectedProduct });
-          console.log('Added to cart:', selectedProduct);
-        } catch (error) {
-          // エラーが発生した場合はエラーを出力
-          console.error('Error adding to cart:', error);
-        }
-      };
+      try {
+        // カートストアから商品の数量を取得
+        const quantity = cartStore.getCounter(productId) || 0;
+        // カートストアに商品を追加する
+        await cartStore.addToCart({ productId, quantity, product: selectedProduct });
+        console.log('Added to cart:', selectedProduct);
+      } catch (error) {
+        // エラーが発生した場合はエラーを出力
+        console.error('Error adding to cart:', error);
+      }
+    };
 
-      // コンポーネントのインスタンスに返すデータ
-      return { products, addToCart };
-    },
-  };
+    // コンポーネントのインスタンスに返すデータ
+    return { products, addToCart };
+  },
+};
 </script>
 
 

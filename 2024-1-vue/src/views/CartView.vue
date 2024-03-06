@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, watch, computed, toRaw } from 'vue';
+import { defineComponent, ref, onMounted, watch, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useItemCountStore } from '@/stores/counterStore';
 import { useRouter } from 'vue-router';
@@ -60,7 +60,7 @@ export default defineComponent({
 
     // カート内の商品情報を保持するリアクティブな変数
     const cartItems = ref([]);
-    
+
     // Vue Routerを使用してルーティングを制御
     const router = useRouter();
 
@@ -68,7 +68,7 @@ export default defineComponent({
     onMounted(() => {
       // カートストアからカート内の商品情報を取得してcartItemsにセット
       cartItems.value = cartStore.getCartItems();
-      console.log('Cart Items:', toRaw(cartItems.value));
+      console.log('Cart Items:', cartItems.value);
     });
 
     // カートストアの変更を監視し、cartItemsを更新
@@ -88,12 +88,12 @@ export default defineComponent({
 
     // カートに商品を追加するメソッド
     const addToCart = async (productId) => {
-      // 商品IDに対応する商品をproductsから検索
-      const selectedProduct = products.value.find(product => product.product_id === productId);
+      // 商品IDに対応する商品をcartItemsから検索
+      const selectedCartItem = cartItems.value.find(item => item.product.product_id === productId);
 
-      if (!selectedProduct) {
+      if (!selectedCartItem) {
         // 該当する商品が見つからない場合はエラーを出力して処理を中断
-        console.error('Product not found with productId:', productId);
+        console.error('CartItem not found with productId:', productId);
         return;
       }
 
@@ -105,7 +105,7 @@ export default defineComponent({
         // カートストアの数量情報を更新
         cartStore.updateQuantity({ productId, quantity });
 
-        console.log('Added to cart:', selectedProduct.product);
+        console.log('Added to cart:', selectedCartItem.product);
       } catch (error) {
         // エラーが発生した場合はエラーを出力
         console.error('Error adding to cart:', error);

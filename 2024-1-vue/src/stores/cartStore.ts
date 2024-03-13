@@ -7,56 +7,55 @@ export const useCartStore = defineStore('cartStore', {
   state: () => ({
     // カート内の商品情報を格納する配列
     cartItems: [],
-    // 商品ごとの数量を管理するcountersオブジェクト
-    counters: {},
   }),
 
   // アクションを定義
   actions: {
     // カートに商品を追加するアクション
-    addToCart({ productId, quantity, product }) {
-      // 商品情報をオブジェクトとして作成
-      const newCartItem = {
-        productId,
-        quantity,
-        product,
-      };
-
-      // カート内の商品リストに新しい商品を追加
-      this.cartItems.push(newCartItem);
+    addToCart({ productId, product }) {
+      const quantity = this.getCounter(productId);
+      if (quantity > 0) {
+        const cartItem = this.cartItems.find(item => item.product.product_id === productId);
+        if (cartItem) {
+          cartItem.quantity += quantity;
+        } else {
+          // カート内の商品リストに新しい商品を追加
+          this.cartItems.push({ product, quantity });
+        }
+      }
+    },
+    
+    // 商品の数量を増やすアクション
+    incrementCounter(productId) {
+      const cartItem = this.cartItems.find(item => item.product.productId === productId);
+      if (cartItem) {
+        cartItem.quantity++;
+      } else {
+        // カートに該当商品がない場合、新しい商品を追加
+        this.cartItems.push({ product: { productId }, quantity: 1 });
+      }
     },
 
-    // カートから商品を削除するアクション
-    removeFromCart(productId) {
-      // カート内の商品リストから指定された商品IDの商品を削除
-      this.cartItems = this.cartItems.filter(item => item.productId !== productId);
-    },
-
-    // カート内の商品を取得するアクション
-    getCartItems() {
-      // カート内の商品リストを返す
-      return this.cartItems;
-    },
-
-    // カートをクリアするアクション
-    clearCart() {
-      // カート内の商品リストを空にする
-      this.cartItems = [];
+    // 商品の数量を減らすアクション
+    decrementCounter(productId) {
+      const cartItem = this.cartItems.find(item => item.product.productId === productId);
+      if (cartItem && cartItem.quantity > 1) {
+        cartItem.quantity--;
+      } else {
+        // カート内の数量が1以下の場合、商品を削除
+        this.cartItems = this.cartItems.filter(item => item.product.productId !== productId);
+      }
     },
 
     // 特定の商品の数量を取得するアクション
     getCounter(productId) {
-      // 商品ごとの数量が存在しない場合は0で初期化し、それを返す
-      if (!this.counters[productId]) {
-        this.counters[productId] = 0;
-      }
-      return this.counters[productId];
+      const cartItem = this.cartItems.find(item => item.product.productId === productId);
+      return cartItem ? cartItem.quantity : 0;
     },
 
-    // 特定の商品の数量を更新するアクション
-    updateQuantity({ productId, quantity }) {
-      // 商品ごとの数量を指定された数量に更新
-      this.counters[productId] = quantity;
+    // 特定の商品をカートから削除するアクション
+    removeItem(productId) {
+      this.cartItems = this.cartItems.filter(item => item.product.productId !== productId);
     },
   },
 });

@@ -17,7 +17,18 @@
             <div class="item-explanation">{{ product.description }}</div>
           </div>
           <div class="item-count-box">
-            <ItemCount :productId="product.product_id" :price="product.price"/>
+            <div class="item-count">
+              <button class="item-count-button" @click="decrement(product.product_id)">
+                <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
+              </button>
+              {{ getCounter(product.product_id) }}
+              <button class="item-count-button" @click="increment(product.product_id)">
+                <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
+              </button>
+            </div>
+            <div class="dust-box" @click="reset(product.product_id)">
+              <img src="../assets/Vector.png" alt="" class="item-count-icon">
+            </div>
           </div>
           <div class="cart-in-box">
             <button class="top-cart-in-button" @click="addToCart(product.product_id)">
@@ -38,69 +49,63 @@
     </section>
   </main>
 </template>
+
 <script>
-import { ref, onMounted } from 'vue';
-import ItemCount from '@/components/ItemCount.vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useProductStore } from '@/stores/productStore';
 import { useCartStore } from '@/stores/cartStore.ts';
 
 export default {
-  components: {
-    ItemCount,
-  },
   setup() {
-    // 商品情報を管理するストアを取得
     const productStore = useProductStore();
-    // カート情報を管理するストアを取得
     const cartStore = useCartStore();
-    // 商品データを保持するリアクティブな変数
     const products = ref([]);
 
-    // 商品データを非同期で取得するメソッド
     const fetchProducts = async () => {
       try {
         await productStore.fetchProducts();
-        console.log('Fetched products');
-        // 商品データをリアクティブ変数にセット
+        console.log('商品を取得しました');
         products.value = [...productStore.products];
       } catch (error) {
-        console.error('Error fetching products:', error);
+        console.error('商品の取得中にエラーが発生しました:', error);
       }
     };
 
-    // コンポーネントがマウントされた時に商品データを取得
+    const getCounter = (productId) => {
+      return cartStore.getCounter(productId);
+    };
+
+    const increment = (productId) => {
+      cartStore.incrementCounter(productId);
+    };
+
+    const decrement = (productId) => {
+      cartStore.decrementCounter(productId);
+    };
+
+    const reset = (productId) => {
+      cartStore.resetCounter(productId);
+    };
+
+    const addToCart = (productId) => {
+      const selectedProduct = reactive(products.value.find(product => product.product_id === productId));
+      cartStore.addToCart({ productId, product: selectedProduct });
+      console.log('Added to cart:', selectedProduct);
+    };
+
     onMounted(fetchProducts);
 
-    // カートに商品を追加するメソッド
-    const addToCart = async (productId) => {
-      // 選択された商品を商品データから取得
-      const selectedProduct = products.value.find(product => product.product_id === productId);
-      console.log('Selected Product:', selectedProduct);
-
-      if (!selectedProduct) {
-        // 該当する商品が見つからない場合はエラーを出力して処理を中断
-        console.error('Product not found with productId:', productId);
-        return;
-      }
-
-      try {
-        // カートストアから商品の数量を取得
-        const quantity = cartStore.getCounter(productId) || 0;
-        // カートストアに商品を追加する
-        await cartStore.addToCart({ productId, quantity, product: selectedProduct });
-        console.log('Added to cart:', selectedProduct);
-      } catch (error) {
-        // エラーが発生した場合はエラーを出力
-        console.error('Error adding to cart:', error);
-      }
+    return {
+      products,
+      getCounter,
+      increment,
+      decrement,
+      reset,
+      addToCart,
     };
-
-    // コンポーネントのインスタンスに返すデータ
-    return { products, addToCart };
   },
 };
 </script>
-
 
 <style lang="scss">
 

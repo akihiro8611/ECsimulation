@@ -60,11 +60,11 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useCustomerFormStore } from '@/stores/customerStore';
 
-export default defineComponent({
+export default {
   setup() {
     // カートストアとフォームストアを使用
     const cartStore = useCartStore();
@@ -72,10 +72,11 @@ export default defineComponent({
     const store = useCustomerFormStore();
 
     // コンポーネントがマウントされた時の処理
-    onMounted(() => {
-      // カートストアからカート内の商品情報を取得してcartItemsにセット
-      cartItems.value = cartStore.getCartItems();
-    });
+    const fetchCartItems = () => {
+      cartItems.value = cartStore.cartItems;
+    };
+
+    onMounted(fetchCartItems);
 
     // カート内の商品の総数量を計算するcomputedプロパティ
     const totalItemCount = computed(() => {
@@ -94,7 +95,7 @@ export default defineComponent({
       totalCartPrice,
     };
   },
-});
+};
 </script>
 
 

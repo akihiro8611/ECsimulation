@@ -16,14 +16,25 @@
             <div class="cart-item-count-contents">
               <div class="cart-item-count-box">
                 <div class="item-count-box">
-                  <ItemCount :productId="item.product.product_id"/>
+                  <div class="item-count">
+                    <button class="item-count-button" @click="decrement(item.product.product_id)">
+                      <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
+                    </button>
+                    {{ item.quantity }}
+                    <button class="item-count-button" @click="increment(item.product.product_id)">
+                      <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
+                    </button>
+                  </div>
+                  <div class="dust-box" @click="reset(item.product.product_id)">
+                    <img src="../assets/Vector.png" alt="" class="item-count-icon">
+                  </div>
                 </div>
               </div>
             </div>
             <!-- 各商品の値段とカウント数を掛け算した合計価格を表示 -->
-            <div class="cart-item-price">{{ itemTotalPrice(item) }}円</div>
+            <div class="cart-item-price">{{ item.product.price*item.quantity }}円</div>
             <!-- 各商品の合計価格を表示 -->
-            <div class="cart-item-product-id">{{ calculateTotalPrice(item) }}円</div>
+            <div class="cart-item-product-id">{{ item.product.product_id }}</div>
           </div>
         </div>
       </div>
@@ -43,90 +54,40 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, watch, computed } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
-import { useItemCountStore } from '@/stores/counterStore';
 import { useRouter } from 'vue-router';
-import ItemCount from '@/components/ItemCount.vue';
 
-export default defineComponent({
-  components: {
-    ItemCount,
-  },
+export default {
   setup() {
-    // カートストアと商品数量ストアを使用
     const cartStore = useCartStore();
-    const counterStore = useItemCountStore();
-
-    // カート内の商品情報を保持するリアクティブな変数
     const cartItems = ref([]);
-
-    // Vue Routerを使用してルーティングを制御
     const router = useRouter();
 
-    // コンポーネントがマウントされた時の処理
-    onMounted(() => {
-      // カートストアからカート内の商品情報を取得してcartItemsにセット
-      cartItems.value = cartStore.getCartItems();
-      console.log('Cart Items:', cartItems.value);
-    });
-
-    // カートストアの変更を監視し、cartItemsを更新
-    watch(() => cartStore.cartItems, (newCartItems) => {
-      cartItems.value = newCartItems;
-    });
-
-    // カート内の商品の総数量を計算するcomputedプロパティ
-    const totalItemCount = computed(() => {
-      return cartItems.value.reduce((total, item) => total + (item.quantity || 0), 0);
-    });
-
-    // カート内の商品の総価格を計算するcomputedプロパティ
-    const totalCartPrice = computed(() => {
-      return cartItems.value.reduce((total, item) => total + (item.product.price * (item.quantity || 0)), 0);
-    });
-
-    // カートに商品を追加するメソッド
-    const addToCart = async (productId) => {
-      // 商品IDに対応する商品をcartItemsから検索
-      const selectedCartItem = cartItems.value.find(item => item.product.product_id === productId);
-
-      if (!selectedCartItem) {
-        // 該当する商品が見つからない場合はエラーを出力して処理を中断
-        console.error('CartItem not found with productId:', productId);
-        return;
-      }
-
-      try {
-        // 商品数量ストアから商品の数量を取得
-        const quantity = counterStore.getCounter(productId) || 0;
-        console.log('Quantity from CounterStore:', quantity);
-
-        // カートストアの数量情報を更新
-        cartStore.updateQuantity({ productId, quantity });
-
-        console.log('Added to cart:', selectedCartItem.product);
-      } catch (error) {
-        // エラーが発生した場合はエラーを出力
-        console.error('Error adding to cart:', error);
-      }
+    const fetchCartItems = () => {
+      cartItems.value = cartStore.cartItems;
     };
+    
 
-    // 顧客情報入力画面に遷移するメソッド
+    // このコンポーネントがマウントされた時にカートアイテムのリストを取得する
+    onMounted(fetchCartItems);
+    
     const navigateToCustomerInfo = () => {
-      // Vue Routerを使用して顧客情報入力画面に遷移
       router.push('/customer');
     };
 
-    // 各商品の合計価格を計算するメソッド
-    const itemTotalPrice = (item) => {
-      return (item.quantity || 0) * item.product.price;
+    const addToCart = async (productId) => {
+      cartStore.addToCart(productId);
     };
 
-    // 各商品の合計価格を表示するメソッド
-    const calculateTotalPrice = (item) => {
-      return itemTotalPrice(item);
-    };
+    // カートの合計点数と合計価格を計算する
+    const totalItemCount = computed(() => {
+      return cartItems.value.reduce((total, item) => total + item.quantity, 0);
+    });
+
+    const totalCartPrice = computed(() => {
+      return cartItems.value.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+    });
 
     return {
       cartItems,
@@ -134,11 +95,9 @@ export default defineComponent({
       navigateToCustomerInfo,
       totalItemCount,
       totalCartPrice,
-      itemTotalPrice,
-      calculateTotalPrice,
     };
   },
-});
+};
 </script>
 
 

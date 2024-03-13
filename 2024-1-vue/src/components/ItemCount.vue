@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="item-count-box">
     <div class="item-count">
       <button class="item-count-button" @click="decrement">
@@ -107,4 +107,4 @@ export default {
   cursor: pointer;
 }
 
-</style>
+</style> -->

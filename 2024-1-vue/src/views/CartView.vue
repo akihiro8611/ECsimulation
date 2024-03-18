@@ -6,35 +6,35 @@
         <p>カートにアイテムがありません。</p>
       </div>
       <div class="cart-item-wrapper">
-        <div v-for="item in cartItems" :key="item.product.product_id" class="cart-item-box">
+        <div v-for="item in cartItems" :key="item.product_id" class="cart-item-box">
           <div class="cart-item-photo-box">
-            <img :src="item.product.image" :alt="item.product.product_name" class="cart-item-photo">
+            <img :src="item.image" :alt="item.product_name" class="cart-item-photo">
           </div>
           <div class="cart-item-text-box">
-            <h2 class="cart-item-title">{{ item.product.product_name }}</h2>
-            <div class="cart-item-explanation">{{ item.product.description }}</div>
+            <h2 class="cart-item-title">{{ item.product_name }}</h2>
+            <div class="cart-item-explanation">{{ item.description }}</div>
             <div class="cart-item-count-contents">
               <div class="cart-item-count-box">
                 <div class="item-count-box">
                   <div class="item-count">
-                    <button class="item-count-button" @click="decrement(item.product.product_id)">
+                    <button class="item-count-button" @click="decrement(item.product_id)">
                       <img src="../assets/uiw_minus-circle.png" alt="" class="item-count-icon">
                     </button>
                     {{ item.quantity }}
-                    <button class="item-count-button" @click="increment(item.product.product_id)">
+                    <button class="item-count-button" @click="increment(item.product_id)">
                       <img src="../assets/uiw_plus-circle.png" alt="" class="item-count-icon">
                     </button>
                   </div>
-                  <div class="dust-box" @click="reset(item.product.product_id)">
+                  <div class="dust-box" @click="reset(item.product_id)">
                     <img src="../assets/Vector.png" alt="" class="item-count-icon">
                   </div>
                 </div>
               </div>
             </div>
             <!-- 各商品の値段とカウント数を掛け算した合計価格を表示 -->
-            <div class="cart-item-price">{{ item.product.price*item.quantity }}円</div>
+            <div class="cart-item-price">{{ item.price*item.quantity }}円</div>
             <!-- 各商品の合計価格を表示 -->
-            <div class="cart-item-product-id">{{ item.product.product_id }}</div>
+            <div class="cart-item-product-id">{{ item.product_id }}</div>
           </div>
         </div>
       </div>
@@ -76,8 +76,20 @@ export default {
       router.push('/customer');
     };
 
-    const addToCart = async (productId) => {
-      cartStore.addToCart(productId);
+    const getCounter = (productId) => {
+      return cartStore.getCounter(productId);
+    };
+
+    const increment = (productId) => {
+      cartStore.incrementCounter(productId);
+    };
+
+    const decrement = (productId) => {
+      cartStore.decrementCounter(productId);
+    };
+
+    const reset = (productId) => {
+      cartStore.resetCounter(productId);
     };
 
     // カートの合計点数と合計価格を計算する
@@ -86,15 +98,18 @@ export default {
     });
 
     const totalCartPrice = computed(() => {
-      return cartItems.value.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+      return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0);
     });
 
     return {
       cartItems,
-      addToCart,
       navigateToCustomerInfo,
       totalItemCount,
       totalCartPrice,
+      increment,
+      decrement,
+      reset,
+      getCounter,
     };
   },
 };

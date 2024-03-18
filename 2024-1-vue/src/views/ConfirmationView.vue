@@ -1,4 +1,12 @@
 <template>
+  <div class="confirmation-title-box">
+    <h1 class="item-contener-title">お客様情報の確認</h1>
+    <button class="confirmation-return-link-box" @click="navigateToCustomerInfo">
+      <div class="confirmation-return-link-text">
+        <p>お客様情報の入力へ</p>
+      </div>
+    </button>
+  </div>
   <div class="confirmation-customer-container">
     <div class="confirmation-information">
       <h2 class="confirmation-sub-title">お客様情報</h2>
@@ -37,17 +45,24 @@
     </div>
   </div>
   <div class="confirmation-item-contener">
-    <h1 class="item-contener-title">注文商品</h1>
-    <div v-for="item in cartItems" :key="item.product.product_id" class="confirmation-item-box">
+    <div class="confirmation-sub-title-box">
+      <h1 class="item-contener-title">注文商品</h1>
+      <button class="confirmation-return-link-box" @click="navigateToCart">
+        <div class="confirmation-return-link-text">
+          <p>カートページへ</p>
+        </div>
+      </button>
+    </div>
+    <div v-for="item in cartItems" :key="item.product_id" class="confirmation-item-box">
       <div class="confirmation-item-photo-box">
-        <img :src="item.product.image" alt="" class="confirmation-item-photo">
+        <img :src="item.image" alt="" class="confirmation-item-photo">
       </div>
       <div class="confirmation-item-text-box">
-        <h2 class="confirmation-item-title">{{ item.product.product_name }}</h2>
+        <h2 class="confirmation-item-title">{{ item.product_name }}</h2>
         <div class="confirmation-item-count-contents">
           <div class="confirmation-item-count">
             <span>数量: {{ item.quantity }}</span>
-            <span>金額: {{ item.quantity*item.product.price }}</span>
+            <span>金額: {{ item.quantity*item.price }}</span>
           </div>
         </div>
       </div>
@@ -57,19 +72,24 @@
       <p class="confirmation-cart-total-price">合計価格: {{ totalCartPrice }}円</p>
     </div>
   </div>
+  <div class="success">
+    
+  </div>
 </template>
 
 <script>
 import { ref, onMounted, computed } from 'vue';
 import { useCartStore } from '/src/stores/cartStore';
 import { useCustomerFormStore } from '@/stores/customerStore';
+import { useRouter } from 'vue-router';
+
 
 export default {
   setup() {
-    // カートストアとフォームストアを使用
     const cartStore = useCartStore();
     const cartItems = ref([]);
     const store = useCustomerFormStore();
+    const router = useRouter();
 
     // コンポーネントがマウントされた時の処理
     const fetchCartItems = () => {
@@ -78,6 +98,15 @@ export default {
 
     onMounted(fetchCartItems);
 
+    const getCounter = (productId) => {
+      return cartStore.getCounter(productId);
+    };
+    const navigateToCart = () => {
+      router.push('/cart');
+    };
+    const navigateToCustomerInfo = () => {
+      router.push('/customer');
+    };
     // カート内の商品の総数量を計算するcomputedプロパティ
     const totalItemCount = computed(() => {
       return cartItems.value.reduce((total, item) => total + item.quantity, 0);
@@ -85,14 +114,18 @@ export default {
 
     // カート内の商品の総価格を計算するcomputedプロパティ
     const totalCartPrice = computed(() => {
-      return cartItems.value.reduce((total, item) => total + item.product.price * item.quantity, 0);
+      return cartItems.value.reduce((total, item) => total + item.price * item.quantity, 0);
     });
 
     return {
       cartItems,
       store,
+      router,
+      navigateToCart,
+      navigateToCustomerInfo,
       totalItemCount,
       totalCartPrice,
+      getCounter,
     };
   },
 };
@@ -100,8 +133,12 @@ export default {
 
 
 <style>
-.confirmation-customer-container{
+.confirmation-title-box {
   padding-top: 100px;
+  padding-left: 10%;
+}
+.confirmation-customer-container{
+  padding-top: 40px;
   display: flex;
   justify-content: center;
   

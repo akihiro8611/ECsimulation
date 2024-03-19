@@ -45,29 +45,39 @@ export const useCartStore = defineStore('cartStore', {
         cartCount.quantity--;
       } else {
         // カート内の数量が1以下の場合、商品を削除
-        this.cartItems = this.cartItems.filter(item => item.product_id !== productId);
-        this.cartCounts = this.cartCounts.filter(item => item.product_id !== productId);
-      }
-    },
-    resetCounter(productId){
-      const cartItem = this.cartItems.find(item => item.product_id === productId);
-      const cartCount = this.cartCounts.find(item => item.product_id === productId);
-      
-      if (cartItem && cartCount) {
-          cartItem.quantity = 0;
-          cartCount.quantity = 0;
+        const cartItem = this.cartItems.find(item => item.product_id === productId);
+        if (cartItem !== -1) {
+          const productName = cartItem.product_name;
+          this.cartItems.splice(cartItem, 1);
+          alert(productName +"がカートから削除されました。");
+        }
       }
     },
 
+    resetCounter(productId) {
+      const cartItem = this.cartItems.find(item => item.product_id === productId);
+      const cartCount = this.cartItems.find(item => item.product_id === productId + '_count');
+      // カウント数を0にする
+      if (cartItem && cartCount) {
+        cartItem.quantity = 0;
+        cartCount.quantity = 0;
+      }
+
+      // 商品をカートから削除し、アラートを表示
+      if (cartItem) {
+        const index = this.cartItems.indexOf(cartItem);
+        if (index !== -1) {
+          const productName = cartItem.product_name;
+          this.cartItems.splice(index, 1);
+          alert(productName +"がカートから削除されました。");
+        }
+      }
+    },
     // 特定の商品の数量を取得するアクション
     getCounter(productId) {
       const cartCount = this.cartCounts.find(item => item.product_id === productId);
-      return cartCount ? cartCount.quantity : 0;
-    },
-
-    // 特定の商品をカートから削除するアクション
-    removeItem(productId) {
-      this.cartItems = this.cartItems.filter(item => item.product.productId !== productId);
+      const cartItem = this.cartItems.find(item => item.product_id === productId);
+      return cartCount ? cartCount.quantity : (cartItem ? cartItem.quantity : 0);
     },
   },
 });

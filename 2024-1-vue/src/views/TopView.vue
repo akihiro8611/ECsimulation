@@ -91,6 +91,8 @@ export default {
       const selectedProduct = reactive(products.value.find(product => product.product_id === productId));
       cartStore.addToCart({ productId, product: selectedProduct });
       console.log('Added to cart:', selectedProduct);
+      const productName = selectedProduct.product_name;
+      alert(productName + "がカートに入りました。");
     };
 
     onMounted(fetchProducts);
